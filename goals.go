@@ -23,25 +23,6 @@ type Goal struct {
 	Notes      string
 }
 
-//Stuff I tried for Cloud SQL connection that didnt work
-// db, err := sql.Open("mysql", "dennisjohn@cloudsql(turing-position-232118:goals)/goals")
-
-// func dbConn() (db *sql.DB) {
-// 	cfg := mysql.Cfg("turing-position-232118:us-east1:goals", "dennisjohn", "dennisjohn")
-// 	cfg.DBName = "goals"
-// 	db, err := mysql.DialCfg(cfg)
-// 	if err != nil {
-// 		panic("couldn't dial: " + err.Error())
-// 	}
-// 	return db
-// }
-
-// db, err = configureCloudSQL(cloudSQLConfig{
-// 	Username: "dennisjohn",
-// 	Password: "dennisjohn",
-// 	Instance: "turing-position-232118:us-east1:goals",
-// })
-
 //function that opens MySQL DB connection on local server ===================================
 func dbConn() (db *sql.DB) {
 	db, err := sql.Open("mysql", "root:dennisjohn@/goals")
