@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Uses local MYSQL Database
+// Uses local MYSQL Database.
 var db *sql.DB
 
 // Goal struct used to import/export data to MySQL database has 4 columns.
