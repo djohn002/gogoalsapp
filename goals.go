@@ -26,9 +26,14 @@ type Goal struct {
 //function that opens MySQL DB connection on local server ===================================
 func dbConn() (db *sql.DB) {
 	db, err := sql.Open("mysql", "root:dennisjohn@/goals")
-	checkError(err)
+	if err != nil {
+		fmt.Println("problem getting goals index from DB: ", err)
+	}
+	// checkError(err)
 	err = db.Ping()
-	checkError(err)
+	if err != nil {
+		fmt.Println("problem pinging DB: ", err)
+	}
 	return db
 }
 
@@ -37,7 +42,9 @@ func index(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	db := dbConn()
 	goals, err := db.Query("SELECT * FROM goals.main") //Query into DB goals, table name "main"
-	checkError(err)
+	if err != nil {
+		fmt.Println("problem with index function & retrieving goals index from DB: ", err)
+	}
 
 	var AllGoals []Goal
 	var tempvariable Goal
@@ -55,13 +62,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 	//parse & return index.html file into variable t
 	t, err := template.ParseFiles("index.html")
 	if err != nil {
-		log.Print("template parsing error: ", err)
+		fmt.Println("template parsing error: ", err)
 	}
 
 	//t is executed with "AllGoals" being sent to the index.html page
 	err = t.Execute(w, AllGoals)
 	if err != nil {
-		log.Print("template executing error: ", err)
+		fmt.Println("template executing error: ", err)
 	}
 	defer db.Close() //not sure why I needed this, but everyone seemed to do it
 }
@@ -71,11 +78,11 @@ func new(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	t, err := template.ParseFiles("new.html")
 	if err != nil {
-		log.Print("template parsing error: ", err)
+		fmt.Println("template parsing error: ", err)
 	}
 	err = t.Execute(w, nil)
 	if err != nil {
-		log.Print("template executing error: ", err)
+		fmt.Println("template executing error: ", err)
 	}
 
 }
@@ -107,7 +114,7 @@ func show(w http.ResponseWriter, r *http.Request) {
 	//tempvariable containing data is sent to t, which is parsed "show.html" form
 	err = t.Execute(w, tempvariable)
 	if err != nil {
-		log.Print("template executing error: ", err)
+		fmt.Println("template executing error: ", err)
 	}
 	defer db.Close()
 }
@@ -124,8 +131,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	//inserts New goal fields into MySQL database using Insert function
 	result, err := db.Exec("INSERT INTO goals.main (goal,typeofgoal,notes) VALUES(?, ?, ?)", Newgoal, Newtypeofgoal, Newnotes)
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
+		fmt.Println("Insertion problem:  ", err)
 	}
 
 	fmt.Println(result)                           //test to see if above Query works
@@ -144,8 +150,7 @@ func edit(w http.ResponseWriter, r *http.Request) {
 
 	goals, err := db.Query("SELECT * FROM goals.main WHERE uid=?", ID)
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
+		fmt.Println("Problem with Show Query: ", err)
 	}
 	fmt.Println(goals) //test to see if above Query works
 
@@ -159,13 +164,13 @@ func edit(w http.ResponseWriter, r *http.Request) {
 	//parse & return edit.html file
 	t, err := template.ParseFiles("edit.html")
 	if err != nil {
-		log.Print("template parsing error: ", err)
+		fmt.Println("template parsing error: ", err)
 	}
 
 	//temp variable is sent to edit.html form
 	err = t.Execute(w, tempvariable)
 	if err != nil {
-		log.Print("template executing error: ", err)
+		fmt.Println("template executing error: ", err)
 	}
 	defer db.Close()
 
@@ -185,8 +190,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	//Update query
 	updatedrow, err := db.Exec("UPDATE goals.main SET goal=?, typeofgoal=?, notes=? WHERE uid=?", Updatedgoal, Updatedtypeofgoal, Updatednotes, ID)
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
+		fmt.Println("problem updating goals index from DB: ", err)
 	}
 	fmt.Println(updatedrow)
 	defer db.Close()
@@ -204,8 +208,7 @@ func delete(w http.ResponseWriter, r *http.Request) {
 	//Delete Query for database
 	_, err := db.Exec("DELETE FROM goals.main WHERE uid=?", ID)
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
+		fmt.Println("problem with deleting goals index from DB: ", err)
 	}
 	defer db.Close()
 	http.Redirect(w, r, "/goals", http.StatusSeeOther) //redirect back to goals page
@@ -222,10 +225,4 @@ func main() {
 	r.HandleFunc("/goals/{id}/edit", edit)
 	r.HandleFunc("/goals/{id}/delete", delete)
 	http.ListenAndServe(":80", r)
-}
-
-func checkError(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
