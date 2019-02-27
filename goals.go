@@ -24,7 +24,7 @@ type Goal struct {
 }
 
 //function that opens MySQL DB connection on local server ===================================
-func dbConn() (db *sql.DB) {
+func Dbconn() (db *sql.DB) {
 	db, err := sql.Open("mysql", "root:dennisjohn@/goals")
 	if err != nil {
 		fmt.Println("problem getting goals index from DB: ", err)
@@ -38,9 +38,9 @@ func dbConn() (db *sql.DB) {
 }
 
 //Index function that lists all goals on main index page=============================================
-func index(w http.ResponseWriter, r *http.Request) {
+func Index(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	db := dbConn()
+	db := Dbconn()
 	goals, err := db.Query("SELECT * FROM goals.main") //Query into DB goals, table name "main"
 	if err != nil {
 		fmt.Println("problem with index function & retrieving goals index from DB: ", err)
@@ -74,7 +74,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 //Displays new form to create a new goal  ====================================
-func new(w http.ResponseWriter, r *http.Request) {
+func New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	t, err := template.ParseFiles("new.html")
 	if err != nil {
@@ -88,9 +88,9 @@ func new(w http.ResponseWriter, r *http.Request) {
 }
 
 //show route - When button is clicked, shows more details about each goal ===========================
-func show(w http.ResponseWriter, r *http.Request) {
+func Show(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	db := dbConn()
+	db := Dbconn()
 	vars := mux.Vars(r) //gets parameters from URL and saves into vars variable
 	ID := vars["id"]    //ID variable identifies goals that needs to be show. Sent later to Query
 	fmt.Fprintf(w, "Goals ID is : %v\n", ID)
@@ -120,9 +120,9 @@ func show(w http.ResponseWriter, r *http.Request) {
 }
 
 //Create route - creates a new goal into database. Received data from "new" as POST ==========================
-func create(w http.ResponseWriter, r *http.Request) {
+func Create(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	db := dbConn()
+	db := Dbconn()
 	//form data from "new.html" is parsed and saved into Newgoal, Newtypeofgoal, Newnotes
 	Newgoal := r.FormValue("Goal")
 	Newtypeofgoal := r.FormValue("Typeofgoal")
@@ -141,10 +141,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 }
 
 //Shows Edit form with populated fields ===================================
-func edit(w http.ResponseWriter, r *http.Request) {
+func Edit(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprintf(w, "This is the edit page \n")
-	db := dbConn()
+	db := Dbconn()
 	vars := mux.Vars(r) //gets ID and saves into vars variable. Will be used for Query below
 	ID := vars["id"]    //ID variable is from parameter
 
@@ -177,9 +177,9 @@ func edit(w http.ResponseWriter, r *http.Request) {
 }
 
 //Update route - receives data from edit form
-func update(w http.ResponseWriter, r *http.Request) {
+func Update(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	db := dbConn()
+	db := Dbconn()
 	vars := mux.Vars(r) //vars will store parameters, specifically ID
 	ID := vars["id"]
 	//Updated form data is parsed & stored into "updated" variables
@@ -200,8 +200,8 @@ func update(w http.ResponseWriter, r *http.Request) {
 }
 
 //delete route that deleted a goal =================================
-func delete(w http.ResponseWriter, r *http.Request) {
-	db := dbConn()
+func Delete(w http.ResponseWriter, r *http.Request) {
+	db := Dbconn()
 	vars := mux.Vars(r) //vars will store parameters from URL
 	ID := vars["id"]
 
@@ -217,12 +217,12 @@ func delete(w http.ResponseWriter, r *http.Request) {
 //Main handles all routes===================================
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/goals", index).Methods("GET")
-	r.HandleFunc("/goals", create).Methods("POST")
-	r.HandleFunc("/goals/new", new)
-	r.HandleFunc("/goals/{id}", show).Methods("GET")
-	r.HandleFunc("/goals/{id}", update).Methods("POST")
-	r.HandleFunc("/goals/{id}/edit", edit)
-	r.HandleFunc("/goals/{id}/delete", delete)
+	r.HandleFunc("/goals", Index).Methods("GET")
+	r.HandleFunc("/goals", Create).Methods("POST")
+	r.HandleFunc("/goals/new", New)
+	r.HandleFunc("/goals/{id}", Show).Methods("GET")
+	r.HandleFunc("/goals/{id}", Update).Methods("POST")
+	r.HandleFunc("/goals/{id}/edit", Edit)
+	r.HandleFunc("/goals/{id}/delete", Delete)
 	http.ListenAndServe(":80", r)
 }
