@@ -23,24 +23,24 @@ type Goal struct {
 	Notes      string
 }
 
-//function that opens MySQL DB connection on local server ===================================
-func Dbconn() (db *sql.DB) {
+//Dbconn opens MySQL DB connection on local server ===================================
+func Dbconn() (*sql.DB, error) {
 	db, err := sql.Open("mysql", "root:dennisjohn@/goals")
 	if err != nil {
-		fmt.Println("problem getting goals index from DB: ", err)
+		return nil, fmt.Errorf("problem getting goals index from DB: %s ", err)
 	}
-	// checkError(err)
+	// checks connection
 	err = db.Ping()
 	if err != nil {
-		fmt.Println("problem pinging DB: ", err)
+		return nil, fmt.Errorf("DB Ping problem: %s ", err)
 	}
-	return db
+	return db, nil
 }
 
 //Index function that lists all goals on main index page=============================================
 func Index(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	db := Dbconn()
+	db, err := Dbconn()
 	goals, err := db.Query("SELECT * FROM goals.main") //Query into DB goals, table name "main"
 	if err != nil {
 		fmt.Println("problem with index function & retrieving goals index from DB: ", err)
@@ -90,7 +90,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 //show route - When button is clicked, shows more details about each goal ===========================
 func Show(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	db := Dbconn()
+	db, err := Dbconn()
 	vars := mux.Vars(r) //gets parameters from URL and saves into vars variable
 	ID := vars["id"]    //ID variable identifies goals that needs to be show. Sent later to Query
 	fmt.Fprintf(w, "Goals ID is : %v\n", ID)
@@ -122,7 +122,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 //Create route - creates a new goal into database. Received data from "new" as POST ==========================
 func Create(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	db := Dbconn()
+	db, err := Dbconn()
 	//form data from "new.html" is parsed and saved into Newgoal, Newtypeofgoal, Newnotes
 	Newgoal := r.FormValue("Goal")
 	Newtypeofgoal := r.FormValue("Typeofgoal")
@@ -144,7 +144,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 func Edit(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprintf(w, "This is the edit page \n")
-	db := Dbconn()
+	db, err := Dbconn()
 	vars := mux.Vars(r) //gets ID and saves into vars variable. Will be used for Query below
 	ID := vars["id"]    //ID variable is from parameter
 
@@ -179,7 +179,7 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 //Update route - receives data from edit form
 func Update(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	db := Dbconn()
+	db, err := Dbconn()
 	vars := mux.Vars(r) //vars will store parameters, specifically ID
 	ID := vars["id"]
 	//Updated form data is parsed & stored into "updated" variables
@@ -201,12 +201,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 //delete route that deleted a goal =================================
 func Delete(w http.ResponseWriter, r *http.Request) {
-	db := Dbconn()
+	db, err := Dbconn()
 	vars := mux.Vars(r) //vars will store parameters from URL
 	ID := vars["id"]
 
 	//Delete Query for database
-	_, err := db.Exec("DELETE FROM goals.main WHERE uid=?", ID)
+	_, err = db.Exec("DELETE FROM goals.main WHERE uid=?", ID)
 	if err != nil {
 		fmt.Println("problem with deleting goals index from DB: ", err)
 	}
