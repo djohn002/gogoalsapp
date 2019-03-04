@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -11,4 +14,15 @@ func TestDbconn(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to connect to DB: %s", err)
 	}
+}
+
+func TestIndexHandler(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/goals", nil)
+	Index(w, r) //calls Index function & send w & r
+
+	if w.Code != http.StatusOK {
+		t.Error(w.Code, string(w.Body.String()))
+	}
+	fmt.Print(w.Code) //prints status code
 }

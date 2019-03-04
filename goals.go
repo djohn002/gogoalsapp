@@ -57,7 +57,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//I used this to test to print to terminal & to make sure DB was updating.
-	fmt.Println(AllGoals)
+	// fmt.Println(AllGoals)
 
 	//parse & return index.html file into variable t
 	t, err := template.ParseFiles("index.html")
@@ -73,7 +73,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	defer db.Close() //not sure why I needed this, but everyone seemed to do it
 }
 
-//Displays new form to create a new goal  ====================================
+//New function Displays new form to create a new goal  ====================================
 func New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	t, err := template.ParseFiles("new.html")
@@ -87,7 +87,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//show route - When button is clicked, shows more details about each goal ===========================
+//Show route - When button is clicked, shows more details about each goal ===========================
 func Show(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	db, err := Dbconn()
@@ -140,7 +140,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/goals", http.StatusSeeOther) //redirect to Index
 }
 
-//Shows Edit form with populated fields ===================================
+//Edit route shows edit form with populated fields ===================================
 func Edit(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprintf(w, "This is the edit page \n")
@@ -199,7 +199,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprintf(w, "Update Goals ID is : %v\n", ID)
 }
 
-//delete route that deleted a goal =================================
+//Delete route that deleted a goal =================================
 func Delete(w http.ResponseWriter, r *http.Request) {
 	db, err := Dbconn()
 	vars := mux.Vars(r) //vars will store parameters from URL
@@ -232,15 +232,3 @@ func main() {
 	r := MakeRouter()
 	http.ListenAndServe(":80", r)
 }
-
-// func main() {
-// 	r := mux.NewRouter()
-// 	r.HandleFunc("/goals", Index).Methods("GET")
-// 	r.HandleFunc("/goals", Create).Methods("POST")
-// 	r.HandleFunc("/goals/new", New)
-// 	r.HandleFunc("/goals/{id}", Show).Methods("GET")
-// 	r.HandleFunc("/goals/{id}", Update).Methods("POST")
-// 	r.HandleFunc("/goals/{id}/edit", Edit)
-// 	r.HandleFunc("/goals/{id}/delete", Delete)
-// 	http.ListenAndServe(":80", r)
-// }
