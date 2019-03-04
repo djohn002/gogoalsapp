@@ -214,8 +214,8 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/goals", http.StatusSeeOther) //redirect back to goals page
 }
 
-//Main handles all routes===================================
-func main() {
+//MakeRouter function creates the router & handles all routes
+func MakeRouter() *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/goals", Index).Methods("GET")
 	r.HandleFunc("/goals", Create).Methods("POST")
@@ -224,5 +224,23 @@ func main() {
 	r.HandleFunc("/goals/{id}", Update).Methods("POST")
 	r.HandleFunc("/goals/{id}/edit", Edit)
 	r.HandleFunc("/goals/{id}/delete", Delete)
+	return r
+}
+
+//Main calls the MakeRouter function & creates server===================================
+func main() {
+	r := MakeRouter()
 	http.ListenAndServe(":80", r)
 }
+
+// func main() {
+// 	r := mux.NewRouter()
+// 	r.HandleFunc("/goals", Index).Methods("GET")
+// 	r.HandleFunc("/goals", Create).Methods("POST")
+// 	r.HandleFunc("/goals/new", New)
+// 	r.HandleFunc("/goals/{id}", Show).Methods("GET")
+// 	r.HandleFunc("/goals/{id}", Update).Methods("POST")
+// 	r.HandleFunc("/goals/{id}/edit", Edit)
+// 	r.HandleFunc("/goals/{id}/delete", Delete)
+// 	http.ListenAndServe(":80", r)
+// }
